@@ -39,7 +39,9 @@ MV_OPTS=""
 ALT_CONF=""
 ALT_DIR=""
 
-while getopts hspnc:d: opt; do
+EXE="${0##*/}"
+
+while getopts ":hspnc:d:" opt; do
     case $opt in
         h)
             show_help >&2
@@ -60,13 +62,16 @@ while getopts hspnc:d: opt; do
         d)
             ALT_DIR="$OPTARG"
             ;;
+        :)
+            echo "$EXE: option requires an argument -- $OPTARG" >&2
+            exit 1
+            ;;
         \?)
+            echo "$EXE: illegal option -- $OPTARG" >&2
             exit 1
             ;;
     esac
 done
-
-EXE="$0"
 
 shift "$((OPTIND - 1))"
 if [[ -n $1 ]]; then
