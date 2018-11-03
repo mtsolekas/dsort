@@ -1,15 +1,15 @@
 .TH man 1 "November 2018" "1.0" "dsort man page"
 
 .SH NAME
-dsort \- automatically sort downloads directory
+dsort \- automatically sort out downloads or any other directory
 
 .SH SYNOPSIS
 .B dsort [OPTION] [FILE]
 
 .SH DESCRIPTION
-Automatically sort the $HOME/Downloads directory,
-following the rules set out in the configuration file
-$HOME/.config/dsort.conf.
+Automatically sort out the $HOME/Downloads directory or any other
+specified directory, following the rules set out in the
+configuration file $HOME/.config/dsort.conf.
 
 The configuration file ignores leading and trailing whitespace,
 empty lines and lines starting with #. Each rule is specified by
@@ -55,6 +55,10 @@ dont overwrite existing files
 .TP
 .B \-c FILE
 specify a different configuration file path
+
+.TP
+.B \-d DIRECTORY
+specify a different directory to sort out
 
 .SH SEE ALSO
 cp(1), mv(1), mkdir(1)

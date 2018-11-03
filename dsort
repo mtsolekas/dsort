@@ -19,14 +19,15 @@
 show_help() {
     cat <<EOH
 Usage: downloads_sort [OPTION] [FILE]
-Automatically sort \$HOME/Downloads directory
+Automatically sort out \$HOME/Downloads or any other directory
 
 Available options are
-  -h        print this message
-  -s        simulate execution and print file types to be moved
-  -p        create destination directories if they dont exist
-  -n        dont overwrite an existing file
-  -c FILE   specify a different configuration file
+  -h             print this message
+  -s             simulate execution and print file types to be moved
+  -p             create destination directories if they dont exist
+  -n             dont overwrite an existing file
+  -c FILE        specify a different configuration file
+  -d DIRECTORY   specify a different directory to sort out
 
 The configuration files default location is \$HOME/.config/downloads_sort.conf
 EOH
@@ -34,10 +35,11 @@ EOH
 
 SIMULATE=""
 MKDIR=""
-ALT_CONFIG=""
 MV_OPTS=""
+ALT_CONF=""
+ALT_DIR=""
 
-while getopts hspnc: opt; do
+while getopts hspnc:d: opt; do
     case $opt in
         h)
             show_help >&2
@@ -53,7 +55,10 @@ while getopts hspnc: opt; do
             MV_OPTS="-n"
             ;;
         c)
-            ALT_CONFIG="$OPTARG"
+            ALT_CONF="$OPTARG"
+            ;;
+        d)
+            ALT_DIR="$OPTARG"
             ;;
         \?)
             exit 1
@@ -69,20 +74,32 @@ if [[ -n $1 ]]; then
     exit 1
 fi
 
-if [[ -z $ALT_CONFIG ]]; then
-    config="$HOME/.config/dsort.conf"
+if [[ -z $ALT_CONF ]]; then
+    conf="$HOME/.config/dsort.conf"
 else
-    config="$ALT_CONFIG"
+    conf="$ALT_CONF"
 fi
 
-if [[ ! -f $config ]]; then
+if [[ ! -f $conf ]]; then
     echo "$EXE: configuration file not found" >&2
     exit 1
 fi
 
-config=$(awk '!/^\s*(#|$)/ {$1=$1; print $0}' "$config")
-if (( $(printf "%s\n" "$config" | wc -l) % 2 != 0 )); then
+conf=$(awk '!/^\s*(#|$)/ {$1=$1; print $0}' "$conf")
+if (( $(printf "%s\n" "$conf" | wc -l) % 2 != 0 )); then
     echo "$EXE: configuration file is ill formed" >&2
+    exit 1
+fi
+
+if [[ -z $ALT_DIR ]]; then
+    dir="$HOME/Downloads"
+else
+    dir="$ALT_DIR"
+fi
+
+if [[ ! -d $dir ]]; then
+    echo  "$dir"
+    echo "$EXE: directory to sort not found" >&2
     exit 1
 fi
 
@@ -95,7 +112,7 @@ shopt -s nullglob
 
 while read -r line; do
     if [[ -z $src ]]; then
-        src="$HOME/Downloads/$line"
+        src="$dir/$line"
 
         files=( $src )
 
@@ -128,6 +145,6 @@ while read -r line; do
     fi
 
     unset src
-done <<< "$config"
+done <<< "$conf"
 
 echo "Moved $total file(s)"
