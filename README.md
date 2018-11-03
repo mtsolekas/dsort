@@ -1,7 +1,7 @@
 # dsort
 
 dsort is bash script that automatically organizes your downloads
-directory, based on simple rules supplied in its configurations file. For
+directory, based on simple rules supplied in it's configurations file. For
 more information about where this file should be located and how to write
 it, as well as dsort's available options, see the manpage.
 
