@@ -1,0 +1,73 @@
+.TH man 1 "November 2018" "1.0" "dsort man page"
+
+.SH NAME
+dsort \- automatically sort downloads directory
+
+.SH SYNOPSIS
+.B dsort [OPTION] [FILE]
+
+.SH DESCRIPTION
+Automatically sort the $HOME/Downloads directory,
+following the rules set out in the configuration file
+$HOME/.config/dsort.conf.
+
+The configuration file ignores leading and trailing whitespace,
+empty lines and lines starting with #. Each rule is specified by
+a glob pattern in one line followed by a destination directory relative
+to the users $HOME directory in the next line, like so:
+
+    # Pattern to match
+    *.png
+
+    # Destination directory for above pattern
+    Pictures/Wallpapers/
+
+    # Some other pattern and destination
+    backup*
+    my/backup/dir/
+
+Destination directories must be relative to your $HOME directory,
+otherwise files may be moved to locations you might not expect.
+
+.SH OPTIONS
+
+.TP
+.B \-h
+print usage information and exit
+
+.TP
+.B \-s
+simulate execution without making changes to the filesystem
+and instead print detailed information about execution results
+(when this option is given, dsort doesn't check if directories
+exist or not)
+
+.TP
+.B \-p
+create destination directories as required
+(when used together with -s, this option has no effect)
+
+.TP
+.B \-n
+dont overwrite existing files
+(when used together with -s, SKIPPED appears for files that already exist)
+
+.TP
+.B \-c FILE
+specify a different configuration file path
+
+.SH SEE ALSO
+cp(1), mv(1), mkdir(1)
+
+.SH AUTHOR
+Marios Tsolekas <marios.tsolekas@gmail.com>
+
+.SH REPORTING BUGS
+Report bugs to <https://github.com/mtsolekas/dsort/issues>
+
+.SH COPYRIGHT
+This program is free software. You can redistribute it and/or modify
+it under the terms of the GNU GPL version 3 or (at your option)
+any later version. There is NO warranty, not even MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.
+See http://gnu.org/licenses/gpl.html

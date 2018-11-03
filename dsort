@@ -1,0 +1,133 @@
+#!/bin/bash
+#
+# Copyright (C) 2018 Marios Tsolekas <marios.tsolekas@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+show_help() {
+    cat <<EOH
+Usage: downloads_sort [OPTION] [FILE]
+Automatically sort \$HOME/Downloads directory
+
+Available options are
+  -h        print this message
+  -s        simulate execution and print file types to be moved
+  -p        create destination directories if they dont exist
+  -n        dont overwrite an existing file
+  -c FILE   specify a different configuration file
+
+The configuration files default location is \$HOME/.config/downloads_sort.conf
+EOH
+}
+
+SIMULATE=""
+MKDIR=""
+ALT_CONFIG=""
+MV_OPTS=""
+
+while getopts hspnc: opt; do
+    case $opt in
+        h)
+            show_help >&2
+            exit 0
+            ;;
+        s)
+            SIMULATE="Y"
+            ;;
+        p)
+            MKDIR="Y"
+            ;;
+        n)
+            MV_OPTS="-n"
+            ;;
+        c)
+            ALT_CONFIG="$OPTARG"
+            ;;
+        \?)
+            exit 1
+            ;;
+    esac
+done
+
+EXE="${0##*/}"
+
+shift "$((OPTIND - 1))"
+if [[ -n $1 ]]; then
+    echo "$EXE: too many arguments" >&2
+    exit 1
+fi
+
+if [[ -z $ALT_CONFIG ]]; then
+    config="$HOME/.config/dsort.conf"
+else
+    config="$ALT_CONFIG"
+fi
+
+if [[ ! -f $config ]]; then
+    echo "$EXE: configuration file not found" >&2
+    exit 1
+fi
+
+config=$(awk '!/^\s*(#|$)/ {$1=$1; print $0}' "$config")
+if (( $(printf "%s\n" "$config" | wc -l) % 2 != 0 )); then
+    echo "$EXE: configuration file is ill formed" >&2
+    exit 1
+fi
+
+if [[ -n $SIMULATE ]]; then
+    echo "Simulating execution..."
+fi
+
+shopt -s nullglob
+(( total = 0 ))
+
+while read -r line; do
+    if [[ -z $src ]]; then
+        src="$HOME/Downloads/$line"
+
+        files=( $src )
+
+        (( count = ${#files[@]} ))
+        (( total += count ))
+        continue
+    fi
+
+    dst="$HOME/$line"
+    if [[ -z $SIMULATE && -n $MKDIR ]]; then
+        mkdir -p "$dst"
+    fi
+
+    if [[ -z $SIMULATE && -n $MKDIR && ! -d $dst ]]; then
+        echo "$EXE: Failed to create directory $dst" >&2
+    elif [[ -z $SIMULATE && ! -d $dst ]]; then
+        echo "$EXE: $dst does not exist" >&2
+    elif [[ -n $SIMULATE ]] && (( count != 0 )); then
+        printf "%b\n" "Moving $count file(s) to $dst:"
+        for file in $src; do
+            if [[ -n $MV_OPTS && -f $dst/${file##*/} ]]; then
+                echo " SKIPPED $file"
+            else
+                echo " $file"
+            fi
+        done
+    elif (( count != 0 )); then
+        # shellcheck disable=SC2086
+        mv $MV_OPTS -- $src "$dst"
+    fi
+
+    unset src
+done <<< "$config"
+
+echo "Moved $total file(s)"
