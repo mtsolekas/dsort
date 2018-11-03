@@ -126,7 +126,7 @@ while read -r line; do
 
     if [[ -n $MV_OPTS ]]; then
         for (( i = 0; i < count; ++i )); do
-            if [[ -f  "$dst/${files[$i]##*/}" ]]; then
+            if [[ -f  $dst/${files[$i]##*/} ]]; then
                 (( --total ))
             fi
         done
