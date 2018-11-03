@@ -66,7 +66,7 @@ while getopts hspnc:d: opt; do
     esac
 done
 
-EXE="${0##*/}"
+EXE="$0"
 
 shift "$((OPTIND - 1))"
 if [[ -n $1 ]]; then
@@ -98,7 +98,6 @@ else
 fi
 
 if [[ ! -d $dir ]]; then
-    echo  "$dir"
     echo "$EXE: directory to sort not found" >&2
     exit 1
 fi
