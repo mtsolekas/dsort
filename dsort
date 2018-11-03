@@ -111,19 +111,26 @@ shopt -s nullglob
 (( total = 0 ))
 
 while read -r line; do
-    if [[ -z $src ]]; then
-        src="$dir/$line"
-
-        files=( $src )
-
+    if (( src_read == 0 )); then
+        files=( "$dir/"$line )
         (( count = ${#files[@]} ))
         (( total += count ))
+
+        (( src_read = 1 ))
         continue
     fi
 
     dst="$HOME/$line"
     if [[ -z $SIMULATE && -n $MKDIR ]]; then
-        mkdir -p "$dst"
+        mkdir -- -p "$dst"
+    fi
+
+    if [[ -n $MV_OPTS ]]; then
+        for (( i = 0; i < count; ++i )); do
+            if [[ -f  "$dst/${files[$i]##*/}" ]]; then
+                (( --total ))
+            fi
+        done
     fi
 
     if [[ -z $SIMULATE && -n $MKDIR && ! -d $dst ]]; then
@@ -132,7 +139,7 @@ while read -r line; do
         echo "$EXE: $dst does not exist" >&2
     elif [[ -n $SIMULATE ]] && (( count != 0 )); then
         printf "%b\n" "Moving $count file(s) to $dst:"
-        for file in $src; do
+        for file in "${files[@]}"; do
             if [[ -n $MV_OPTS && -f $dst/${file##*/} ]]; then
                 echo " SKIPPED $file"
             else
@@ -140,11 +147,10 @@ while read -r line; do
             fi
         done
     elif (( count != 0 )); then
-        # shellcheck disable=SC2086
-        mv $MV_OPTS -- $src "$dst"
+        mv $MV_OPTS -- "${files[@]}" "$dst"
     fi
 
-    unset src
+    (( src_read = 0))
 done <<< "$conf"
 
 echo "Moved $total file(s)"
