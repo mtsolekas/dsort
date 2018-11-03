@@ -131,7 +131,7 @@ while read -r line; do
 
     if [[ -z $SIMULATE && $count -gt 0 ]]; then
         if [[ -n $MKDIR ]]; then
-            mkdir -- -p "$dst"
+            mkdir -p -- "$dst"
         fi
 
         if [[ -n $MKDIR && ! -d $dst ]]; then
