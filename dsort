@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2018 Marios Tsolekas <marios.tsolekas@gmail.com>
+# Copyright (C) 2018, 2019 Marios Tsolekas <marios.tsolekas@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 show_help() {
     cat <<EOH
-Usage: downloads_sort [OPTION] [FILE]
+Usage: dsort [OPTION] [FILE]
 Automatically sort out \$HOME/Downloads or any other directory
 
 Available options are
